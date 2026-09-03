@@ -248,7 +248,9 @@ const html = String.raw`<!doctype html>
     const state = {
       session: null, entries: [], reminders: [], attachments: [], selectedId: null,
       tab: 'work', filter: 'all', search: '', saving: false, recognition: null,
-      listening: false, localMode: !cloudAvailable, mobileEditorOpen: false
+      listening: false, voiceShouldContinue: false, voiceRecentFinals: new Map(),
+      localMode: !cloudAvailable, mobileEditorOpen: false, syncing: false,
+      syncTimer: null, dueTimer: null
     };
 
     function toast(message, type = '') {
@@ -463,12 +465,25 @@ const html = String.raw`<!doctype html>
     function exportEntry(e){const text='# '+(e.title||'Untitled')+'\n\n'+e.content+'\n\n'+(e.tags?.length?'Tags: '+e.tags.map(t=>'#'+t).join(' ')+'\n\n':'')+'Created: '+new Date(e.created_at).toLocaleString();const blob=new Blob([text],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(e.title||'journal-entry').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.md';a.click();URL.revokeObjectURL(a.href)}
 
     function toggleVoice(){
-      if(state.listening){state.recognition?.stop();return}
+      if(state.listening){stopVoice();return}
       const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Recognition){toast('Voice transcription works best in Chrome or Edge','error');return}
-      const recognition=new Recognition();recognition.continuous=true;recognition.interimResults=true;recognition.lang=navigator.language||'en-US';state.recognition=recognition;state.listening=true;render();
-      let lastCommittedIndex=-1;const recentFinals=new Map();
-      recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){if(i<=lastCommittedIndex)continue;lastCommittedIndex=i;const fingerprint=transcript.toLowerCase().replace(/\s+/g,' ').trim(),seenAt=recentFinals.get(fingerprint)||0,currentTime=Date.now();if(fingerprint&&currentTime-seenAt<3500)continue;recentFinals.set(fingerprint,currentTime);for(const [key,time] of recentFinals){if(currentTime-time>10000)recentFinals.delete(key)}const command=fingerprint.replace(/[.!?]/g,'').trim();if(command==='stop'){recognition.stop();return}const committed=command==='period'?'.':(command==='comma'||command==='comme'?',':novelSpeechSegment($('#entryContent'),transcript));if(committed)insertAtCursor($('#entryContent'),committed);}else interim=transcript}const save=$('#saveState');if(save&&interim)save.textContent='Hearing: '+interim.slice(0,28)};
-      recognition.onerror=e=>{if(e.error!=='aborted')toast('Microphone: '+e.error,'error')};recognition.onend=()=>{state.listening=false;state.recognition=null;render()};recognition.start();
+      state.voiceShouldContinue=true;state.listening=true;state.voiceRecentFinals=new Map();render();startVoiceCycle();
+    }
+    function stopVoice(){
+      state.voiceShouldContinue=false;
+      if(state.recognition){try{state.recognition.stop()}catch{}}
+      else{state.listening=false;render()}
+    }
+    function startVoiceCycle(){
+      if(!state.voiceShouldContinue)return;
+      const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!Recognition){state.voiceShouldContinue=false;state.listening=false;render();return}
+      const recognition=new Recognition();recognition.continuous=true;recognition.interimResults=true;recognition.lang=navigator.language||'en-US';state.recognition=recognition;
+      let lastCommittedIndex=-1;
+      recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){if(i<=lastCommittedIndex)continue;lastCommittedIndex=i;const fingerprint=transcript.toLowerCase().replace(/\s+/g,' ').trim(),seenAt=state.voiceRecentFinals.get(fingerprint)||0,currentTime=Date.now();if(fingerprint&&currentTime-seenAt<3500)continue;state.voiceRecentFinals.set(fingerprint,currentTime);for(const [key,time] of state.voiceRecentFinals){if(currentTime-time>10000)state.voiceRecentFinals.delete(key)}const command=fingerprint.replace(/[.!?]/g,'').trim();if(command==='stop'){state.voiceShouldContinue=false;recognition.stop();return}const committed=command==='period'?'.':(command==='comma'||command==='comme'?',':novelSpeechSegment($('#entryContent'),transcript));if(committed)insertAtCursor($('#entryContent'),committed);}else interim=transcript}const save=$('#saveState');if(save)save.textContent=interim?'Hearing: '+interim.slice(0,28):'Listening…'};
+      recognition.onerror=event=>{if(event.error==='not-allowed'||event.error==='service-not-allowed'){state.voiceShouldContinue=false;toast('Microphone permission is required','error')}else if(!['aborted','no-speech'].includes(event.error))toast('Microphone: '+event.error,'error')};
+      recognition.onend=()=>{if(state.recognition===recognition)state.recognition=null;if(state.voiceShouldContinue){const save=$('#saveState');if(save)save.textContent='Listening…';setTimeout(startVoiceCycle,300)}else{state.listening=false;render()}};
+      try{recognition.start()}catch{if(state.voiceShouldContinue)setTimeout(startVoiceCycle,500)}
     }
     function novelSpeechSegment(el, transcript) {
       if (!el || !transcript) return transcript;
@@ -490,12 +505,36 @@ const html = String.raw`<!doctype html>
     function blobToDataUrl(blob){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(blob)})}
     async function deleteAttachment(id){const a=state.attachments.find(x=>x.id===id);if(!a)return;if(!confirm('Remove this photo?'))return;try{if(state.localMode){state.attachments=state.attachments.filter(x=>x.id!==id);localWrite('attachments',state.attachments)}else{const del=await supabase.storage.from('journal-images').remove([a.storage_path]);if(del.error)throw del.error;const row=await supabase.from('attachments').delete().eq('id',id);if(row.error)throw row.error;state.attachments=state.attachments.filter(x=>x.id!==id)}render()}catch(error){toast(error.message,'error')}}
 
-    async function signOut(){if(state.listening)state.recognition?.stop();if(cloudAvailable)await supabase.auth.signOut();state.session=null;state.entries=[];renderAuth()}
+    async function refreshCloudData() {
+      if(state.localMode||!state.session?.user?.id||state.syncing||!navigator.onLine)return;
+      state.syncing=true;
+      try{
+        const [entries,reminders,attachments]=await Promise.all([
+          supabase.from('entries').select('*').order('updated_at',{ascending:false}).limit(500),
+          supabase.from('reminders').select('*').order('due_at',{ascending:true}).limit(500),
+          supabase.from('attachments').select('*').order('created_at',{ascending:true}).limit(500)
+        ]);
+        const error=entries.error||reminders.error||attachments.error;if(error)throw error;
+        const activeField=['entryTitle','entryContent'].includes(document.activeElement?.id);const current=selectedEntry();
+        const oldIds=new Set(state.entries.map(item=>item.id));state.entries=entries.data;
+        if(activeField&&current){const index=state.entries.findIndex(item=>item.id===current.id);if(index>=0)state.entries[index]=current;else state.entries.unshift(current)}
+        state.reminders=reminders.data;state.attachments=attachments.data;await hydrateAttachmentUrls();
+        const receivedNew=state.entries.some(item=>!oldIds.has(item.id));
+        if(activeField&&state.tab!=='reminders')renderEntryListOnly();else render();
+        if(receivedNew)toast('New note synced from another device');
+      }catch(error){console.warn('Cloud refresh paused:',error.message)}finally{state.syncing=false}
+    }
+    function setupCloudRefresh(){
+      clearInterval(state.syncTimer);if(state.localMode)return;
+      state.syncTimer=setInterval(refreshCloudData,12000);
+    }
+    async function signOut(){if(state.listening)stopVoice();clearInterval(state.syncTimer);clearInterval(state.dueTimer);if(cloudAvailable)await supabase.auth.signOut();state.session=null;state.entries=[];renderAuth()}
     function checkDueReminders(){const due=state.reminders.filter(r=>!r.completed&&new Date(r.due_at)<=new Date()&&!sessionStorage.getItem('notified-'+r.id));due.forEach(r=>{sessionStorage.setItem('notified-'+r.id,'1');toast('Reminder: '+r.title);if(Notification.permission==='granted')new Notification(CONFIG.appName,{body:r.title})})}
-    async function startApp(){try{$('#loading').classList.remove('hidden');await data.load();const work=state.entries.find(e=>e.space==='work'&&!e.archived);state.selectedId=work?.id||null;render();checkDueReminders();setInterval(checkDueReminders,60000)}catch(error){$('#loading').classList.add('hidden');toast(error.message||'Could not load your journal','error');renderAuth()}}
+    async function startApp(){try{$('#loading').classList.remove('hidden');await data.load();const work=state.entries.find(e=>e.space==='work'&&!e.archived);state.selectedId=work?.id||null;render();checkDueReminders();clearInterval(state.dueTimer);state.dueTimer=setInterval(checkDueReminders,60000);setupCloudRefresh()}catch(error){$('#loading').classList.add('hidden');toast(error.message||'Could not load your journal','error');renderAuth()}}
 
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#searchInput')?.focus()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();createEntry(state.tab==='personal'?'personal':'work')}if(e.key==='Escape'&&$('#modalRoot').innerHTML)closeModal()});
-    window.addEventListener('online',()=>toast('Back online'));window.addEventListener('offline',()=>toast('Offline — drafts stay on this device'));
+    window.addEventListener('online',()=>{toast('Back online');refreshCloudData()});window.addEventListener('offline',()=>toast('Offline — drafts stay on this device'));
+    window.addEventListener('focus',refreshCloudData);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCloudData()});
     if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
     if(cloudAvailable){const {data:{session}}=await supabase.auth.getSession();state.session=session;supabase.auth.onAuthStateChange((_event,next)=>{if(next&&!state.session){state.session=next;startApp()}else state.session=next});if(session)await startApp();else renderAuth()}else renderAuth();
