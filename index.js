@@ -100,7 +100,7 @@ const html = String.raw`<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f0e8" />
+  <meta name="theme-color" content="#0c0e0f" />
   <meta name="description" content="A calm second brain for notes, photos, voice capture, and reminders." />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
@@ -153,6 +153,46 @@ const html = String.raw`<!doctype html>
     @media(max-width:960px){.app{grid-template-columns:210px 310px 1fr}.editor{padding-left:36px;padding-right:36px}.tool-button span{display:none}}
     @media(max-width:760px){body{overflow:hidden}.app{display:block;height:100dvh}.sidebar{display:none}.list-pane{height:100%;border:0;padding-top:max(0px,env(safe-area-inset-top))}.mobile-top{display:flex;align-items:center;padding:18px 18px 10px}.mobile-brand{font:700 23px Georgia,serif}.mobile-top .icon-button{margin-left:auto}.list-header{padding:10px 17px 12px}.list-title-row{margin-top:3px}.entry-list{padding:0 10px 100px}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(3,1fr);left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:10;background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:17px;padding:6px;backdrop-filter:blur(16px)}.bottom-nav button{border:0;background:transparent;padding:9px 4px;border-radius:11px;color:var(--muted);font-size:11px;font-weight:750}.bottom-nav button.active{background:var(--accent-soft);color:var(--accent-deep)}.mobile-new{position:fixed;right:18px;bottom:91px;z-index:9;width:55px;height:55px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font-size:25px;box-shadow:var(--shadow)}.editor-pane{position:fixed;inset:0;z-index:12;display:none}.editor-pane.mobile-open{display:block}.editor{padding:18px 20px 110px;min-height:100%}.editor-top{margin-bottom:25px}.mobile-back{display:grid}.editor-title{font-size:31px}.editor-content{font-size:17px;min-height:48vh}.tool-row{position:fixed;left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));width:auto;justify-content:space-around}.tool-button span{display:inline}.reminder-view{padding:25px 19px 110px}.reminder-head{align-items:flex-start}.auth-shell{display:block}.auth-art{min-height:38vh;padding:31px 25px}.auth-copy h1{font-size:46px}.auth-copy p{font-size:15px}.auth-card-wrap{padding:24px 17px}.auth-card{padding:25px}.list-pane.reminders-active .list-header,.list-pane.reminders-active .entry-list{display:none}.list-pane.reminders-active{background:var(--surface)}.list-pane.reminders-active #mobileReminderHost{display:block!important}}
     @media(max-width:400px){.tool-button{padding:9px}.tool-button span{display:none}.editor{padding-left:17px;padding-right:17px}}
+
+    /* ── Industrial library theme ───────────────────────────────────────── */
+    :root,[data-theme="dark"]{
+      --paper:#0c0e0f;--surface:#111315;--surface-2:#1c1f22;--ink:#f4f3ef;--muted:#9da0a3;
+      --line:#30343a;--accent:#ff5a00;--accent-deep:#ff7833;--accent-soft:#2c1a11;
+      --work:#ff6a1a;--personal:#9b8cff;--danger:#ff5f62;--shadow:0 18px 55px rgba(0,0,0,.32);
+      --radius:6px;
+    }
+    [data-theme="light"]{
+      --paper:#ececea;--surface:#f7f7f4;--surface-2:#e0e1df;--ink:#101214;--muted:#62666a;
+      --line:#bfc2c4;--accent:#e84f00;--accent-deep:#a93800;--accent-soft:#ffe0cf;
+      --work:#e84f00;--personal:#6856c6;--danger:#b73338;--shadow:0 18px 45px rgba(20,20,20,.12);
+    }
+    body{background-color:var(--paper);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;background-position:-1px -1px}
+    .sidebar,.list-pane,.editor-pane{background:color-mix(in srgb,var(--surface) 97%,transparent)}
+    .sidebar{padding:22px 18px;border-color:var(--line)}
+    .brand{font:700 18px/1 var(--font);letter-spacing:.11em;text-transform:uppercase;padding:0 1px 24px}
+    .brand-mark{width:42px;height:42px;border-radius:2px;background:#090a0b;border:1px solid var(--line);color:var(--accent);font-size:14px;font-weight:900;box-shadow:none}
+    .new-button{border:1px solid #f4f3ef;border-radius:5px;background:#f4f3ef;color:#101214;text-transform:uppercase;letter-spacing:.04em;padding:14px 15px}
+    .new-button:hover{background:var(--accent);border-color:var(--accent);color:white}
+    .nav{gap:8px}.nav-button{border:1px solid transparent;border-radius:4px;padding:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .nav-button:hover{border-color:var(--line);background:var(--surface-2)}.nav-button.active{background:var(--surface-2);border-color:var(--line);color:var(--ink);box-shadow:inset 3px 0 var(--accent)}
+    .nav-button .count{border-radius:3px;background:#292c2d;color:var(--ink)}
+    .icon-button{border-radius:5px;background:transparent}.icon-button:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+    .list-header{border-bottom:1px solid var(--line);padding-bottom:19px}.eyebrow,.crumb,.group-title,.field label{letter-spacing:.14em;color:color-mix(in srgb,var(--ink) 68%,var(--accent));}
+    .list-title,.reminder-title{font-family:var(--font);font-weight:500;letter-spacing:-.04em;text-transform:uppercase}.list-title{font-size:34px}
+    .search input{border-radius:4px;background:#0f1112;border-color:var(--line)}[data-theme="light"] .search input{background:var(--surface)}
+    .filter,.tag,.detail-chip,.config-badge{border-radius:3px;text-transform:uppercase;letter-spacing:.04em}.filter.active{background:#f4f3ef;color:#101214}
+    .entry-list{padding:12px 12px 110px}.entry-card{border:1px solid transparent;border-bottom-color:var(--line);padding:18px 13px}.entry-card:hover{border-radius:4px;border-color:var(--line);background:#17191b}.entry-card.active{border-radius:4px;background:#0a0b0c;border:1px solid var(--line);box-shadow:inset 3px 0 var(--accent)}
+    [data-theme="light"] .entry-card:hover,[data-theme="light"] .entry-card.active{background:var(--surface)}
+    .card-meta{color:var(--accent);letter-spacing:.09em}.card-title{font-size:16px}.card-preview{line-height:1.55}
+    .editor{max-width:920px;padding-top:34px}.editor-top{border-bottom:1px solid var(--line);padding-bottom:15px}.editor-title{font-family:var(--font);font-size:44px;font-weight:500;letter-spacing:-.045em}.editor-content{font-family:var(--font);font-size:17px;line-height:1.78}
+    .tool-row{border-radius:5px;background:#0d0f10;box-shadow:none}.tool-button{border-radius:3px;text-transform:uppercase;letter-spacing:.03em}.tool-button:hover{background:var(--surface-2);color:var(--accent)}
+    [data-theme="light"] .tool-row{background:var(--surface)}
+    .photo,.modal,.auth-card{border-radius:5px}.reminder-item{border:1px solid var(--line);padding:16px;margin-bottom:8px}.check{border-radius:3px;border-color:var(--accent)}
+    .button{border-radius:4px;text-transform:uppercase;letter-spacing:.04em}.button.primary{background:#f4f3ef;color:#101214}.button.primary:hover{background:var(--accent);border-color:var(--accent);color:white}
+    .modal{border:1px solid var(--line)}.modal h2,.auth-card h2{font-family:var(--font);font-weight:500;text-transform:uppercase;letter-spacing:-.02em}.field input,.field textarea,.field select{border-radius:4px;background:#0c0e0f}.auth-shell{background:var(--paper)}
+    .auth-art{background:#0a0b0c;border-right:1px solid var(--line)}.auth-art:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:48px 48px}.auth-art:after{content:'D/';right:28px;bottom:-40px;font:900 240px/1 var(--font);color:rgba(255,90,0,.12)}.auth-logo{font:700 20px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);position:relative;z-index:1}.auth-copy h1{font-family:var(--font);font-weight:500;text-transform:uppercase;letter-spacing:-.055em}.auth-card{border:1px solid var(--line);box-shadow:none}.config-badge{background:var(--accent-soft);color:var(--accent)}
+    .bottom-nav{border-radius:5px!important;background:#0d0f10!important}.bottom-nav button{border-radius:3px!important;text-transform:uppercase;letter-spacing:.05em}.bottom-nav button.active{background:#f4f3ef!important;color:#101214!important}.mobile-new{display:none;border-radius:4px!important;background:var(--accent)!important;color:#fff!important}
+    @media(max-width:760px){.mobile-new{display:block}.mobile-brand{font-family:var(--font);font-size:18px;letter-spacing:.09em;text-transform:uppercase}.list-header{border-bottom:0}.entry-card.active{box-shadow:inset 3px 0 var(--accent)}.editor-title{font-size:34px}.auth-art{border-right:0;border-bottom:1px solid var(--line)}}
   </style>
 </head>
 <body>
@@ -216,7 +256,7 @@ const html = String.raw`<!doctype html>
       $('#toastRoot').append(el); setTimeout(() => el.remove(), 3200);
     }
     function setTheme(theme) { document.documentElement.dataset.theme = theme; localStorage.setItem('daybook-theme', theme); }
-    setTheme(localStorage.getItem('daybook-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    setTheme(localStorage.getItem('daybook-theme') || 'dark');
     function localRead(key, fallback = []) { try { return JSON.parse(localStorage.getItem('daybook-' + key)) || fallback; } catch { return fallback; } }
     function localWrite(key, value) { localStorage.setItem('daybook-' + key, JSON.stringify(value)); }
     function recoverDrafts() {
@@ -235,6 +275,54 @@ const html = String.raw`<!doctype html>
       }
       if (recovered.length) setTimeout(() => toast('Recovered your unsaved draft'), 250);
     }
+    async function migrateLocalJournalIfNeeded() {
+      if (!cloudAvailable || !state.session?.user?.id || sessionStorage.getItem('daybook-migration-checked')) return;
+      sessionStorage.setItem('daybook-migration-checked', '1');
+      const localEntries = localRead('entries');
+      const localReminders = localRead('reminders');
+      const localAttachments = localRead('attachments');
+      if (!localEntries.length && !localReminders.length) return;
+      const count = localEntries.length;
+      if (!confirm('Daybook found ' + count + ' note' + (count === 1 ? '' : 's') + ' saved only on this device. Move them into your private cloud journal so they sync to your phone?')) return;
+      toast('Moving local notes to your private cloud journal…');
+      const userId = state.session.user.id;
+      const entryPayload = localEntries.map(item => { const clean = {...item, user_id:userId}; delete clean.localOnly; return clean; });
+      const reminderPayload = localReminders.map(item => ({...item, user_id:userId}));
+      if (entryPayload.length) {
+        const result = await supabase.from('entries').upsert(entryPayload).select();
+        if (result.error) throw result.error;
+        state.entries = mergeById(state.entries, result.data);
+      }
+      if (reminderPayload.length) {
+        const result = await supabase.from('reminders').upsert(reminderPayload).select();
+        if (result.error) throw result.error;
+        state.reminders = mergeById(state.reminders, result.data);
+      }
+      let photoFailures = 0;
+      for (const item of localAttachments) {
+        try {
+          if (!item.url?.startsWith('data:')) { photoFailures++; continue; }
+          const blob = await fetch(item.url).then(response => response.blob());
+          const storagePath = userId + '/' + item.entry_id + '/' + item.id + '.jpg';
+          const upload = await supabase.storage.from('journal-images').upload(storagePath, blob, {contentType:item.mime_type || 'image/jpeg', upsert:true});
+          if (upload.error) throw upload.error;
+          const row = {id:item.id,user_id:userId,entry_id:item.entry_id,storage_path:storagePath,file_name:item.file_name,mime_type:item.mime_type || 'image/jpeg',size_bytes:blob.size,created_at:item.created_at};
+          const saved = await supabase.from('attachments').upsert(row).select().single();
+          if (saved.error) throw saved.error;
+          state.attachments = mergeById(state.attachments, [saved.data]);
+        } catch { photoFailures++; }
+      }
+      localStorage.removeItem('daybook-entries');
+      localStorage.removeItem('daybook-reminders');
+      if (!photoFailures) localStorage.removeItem('daybook-attachments');
+      toast(count + ' local note' + (count === 1 ? '' : 's') + ' moved to cloud sync');
+      if (photoFailures) toast(photoFailures + ' photo' + (photoFailures === 1 ? '' : 's') + ' could not be moved; they remain stored locally', 'error');
+    }
+    function mergeById(existing, incoming) {
+      const merged = new Map(existing.map(item => [item.id, item]));
+      incoming.forEach(item => merged.set(item.id, item));
+      return Array.from(merged.values());
+    }
 
     const data = {
       async load() {
@@ -250,6 +338,7 @@ const html = String.raw`<!doctype html>
         if (error) throw error;
         state.entries = entries.data; state.reminders = reminders.data; state.attachments = attachments.data;
         recoverDrafts();
+        await migrateLocalJournalIfNeeded();
         await hydrateAttachmentUrls();
       },
       async saveEntry(entry) {
@@ -309,11 +398,11 @@ const html = String.raw`<!doctype html>
 
     function renderAuth(){
       $('#loading').classList.add('hidden'); $('#appRoot').classList.add('hidden'); const root=$('#authRoot');root.classList.remove('hidden');
-      root.innerHTML='<main class="auth-shell"><section class="auth-art"><div class="auth-logo">◒ '+escapeHtml(CONFIG.appName)+'</div><div class="auth-copy"><h1>Your thoughts,<br>kept close.</h1><p>Capture ideas, memories, photos and the things you cannot afford to forget.</p></div><small>Private by design · Built for quiet focus</small></section><section class="auth-card-wrap"><form class="auth-card" id="authForm"><span class="config-badge">'+(cloudAvailable?'SECURE CLOUD SYNC':'LOCAL MODE')+'</span><h2>'+ (cloudAvailable?'Welcome back':'Open your Daybook') +'</h2><p>'+(cloudAvailable?'Enter your email and we will send you a secure sign-in link.':(startupWarning||'Supabase is not configured yet. Notes on this device will stay in this browser.'))+'</p>'+(cloudAvailable?'<div class="field"><label for="email">Email address</label><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>':'')+'<button class="button primary" type="submit">'+(cloudAvailable?'Send sign-in link':'Open local journal')+'</button><div class="demo-note">'+(cloudAvailable?'No password needed. Your journal is visible only to you.':(hasCloudConfig?'Check this browser’s connection or content-blocking settings to restore cloud sync.':'Add Supabase environment variables before deployment to enable accounts and cross-device sync.'))+'</div></form></section></main>';
+      root.innerHTML='<main class="auth-shell"><section class="auth-art"><div class="auth-logo">D/ '+escapeHtml(CONFIG.appName)+'</div><div class="auth-copy"><h1>Your thoughts,<br>kept close.</h1><p>Capture ideas, memories, photos and the things you cannot afford to forget.</p></div><small>Private by design · Built for quiet focus</small></section><section class="auth-card-wrap"><form class="auth-card" id="authForm"><span class="config-badge">'+(cloudAvailable?'SECURE CLOUD SYNC':'LOCAL MODE')+'</span><h2>'+ (cloudAvailable?'Welcome back':'Open your Daybook') +'</h2><p>'+(cloudAvailable?'Enter your email and we will send you a secure sign-in link.':(startupWarning||'Supabase is not configured yet. Notes on this device will stay in this browser.'))+'</p>'+(cloudAvailable?'<div class="field"><label for="email">Email address</label><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>':'')+'<button class="button primary" type="submit">'+(cloudAvailable?'Send sign-in link':'Open local journal')+'</button><div class="demo-note">'+(cloudAvailable?'No password needed. Your journal is visible only to you.':(hasCloudConfig?'Check this browser’s connection or content-blocking settings to restore cloud sync.':'Add Supabase environment variables before deployment to enable accounts and cross-device sync.'))+'</div></form></section></main>';
       $('#authForm').onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;if(!cloudAvailable){state.session={user:{id:'local-user',email:'Local journal'}};await startApp();return;}const email=$('#email').value.trim();const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});button.disabled=false;if(error)toast(error.message,'error');else{toast('Check your email for the sign-in link');button.textContent='Link sent';}};
     }
 
-    function shellHtml(){return '<div class="app"><aside class="sidebar"><div class="brand"><span class="brand-mark">◒</span>'+escapeHtml(CONFIG.appName)+'</div><button class="new-button" data-action="new">'+icon('plus')+' New entry</button><nav class="nav">'+navButtons()+'</nav><div class="sidebar-foot"><div class="user-chip"><div class="user-email">'+escapeHtml(state.session?.user?.email||'Local journal')+'</div></div><button class="icon-button" data-action="theme" title="Toggle theme">'+icon('sun')+'</button><button class="icon-button" data-action="logout" title="Sign out">'+icon('logout')+'</button></div></aside><section class="list-pane '+(state.tab==='reminders'?'reminders-active':'')+'" id="listPane"><div class="mobile-top"><div class="mobile-brand">◒ '+escapeHtml(CONFIG.appName)+'</div><button class="icon-button" data-action="theme">'+icon('sun')+'</button></div><div class="list-header">'+listHeaderHtml()+'</div><div class="entry-list" id="entryList">'+entryListHtml()+'</div><div id="mobileReminderHost" class="hidden">'+(state.tab==='reminders'?remindersHtml():'')+'</div></section><main class="editor-pane '+(state.mobileEditorOpen?'mobile-open':'')+'" id="editorPane">'+mainPaneHtml()+'</main><button class="mobile-new" data-action="new" aria-label="New entry">+</button><nav class="bottom-nav">'+bottomNavHtml()+'</nav></div>'}
+    function shellHtml(){return '<div class="app"><aside class="sidebar"><div class="brand"><span class="brand-mark">D/</span>'+escapeHtml(CONFIG.appName)+'</div><button class="new-button" data-action="new">'+icon('plus')+' New entry</button><nav class="nav">'+navButtons()+'</nav><div class="sidebar-foot"><div class="user-chip"><div class="user-email">'+escapeHtml(state.localMode?'Local only · not syncing':state.session?.user?.email||'Cloud sync')+'</div></div><button class="icon-button" data-action="theme" title="Toggle theme">'+icon('sun')+'</button><button class="icon-button" data-action="logout" title="Sign out">'+icon('logout')+'</button></div></aside><section class="list-pane '+(state.tab==='reminders'?'reminders-active':'')+'" id="listPane"><div class="mobile-top"><div class="mobile-brand">D/ '+escapeHtml(CONFIG.appName)+'</div><button class="icon-button" data-action="theme">'+icon('sun')+'</button></div><div class="list-header">'+listHeaderHtml()+'</div><div class="entry-list" id="entryList">'+entryListHtml()+'</div><div id="mobileReminderHost" class="hidden">'+(state.tab==='reminders'?remindersHtml():'')+'</div></section><main class="editor-pane '+(state.mobileEditorOpen?'mobile-open':'')+'" id="editorPane">'+mainPaneHtml()+'</main><button class="mobile-new" data-action="new" aria-label="New entry">+</button><nav class="bottom-nav">'+bottomNavHtml()+'</nav></div>'}
     function navButtons(){return [['work','Work','work'],['personal','Personal','personal'],['reminders','Reminders','reminder']].map(([key,label,dot])=>'<button class="nav-button '+(state.tab===key?'active':'')+'" data-tab="'+key+'"><span class="nav-dot '+dot+'"></span>'+label+'<span class="count">'+tabCount(key)+'</span></button>').join('')}
     function bottomNavHtml(){return [['work','Work'],['personal','Personal'],['reminders','Reminders']].map(([key,label])=>'<button class="'+(state.tab===key?'active':'')+'" data-tab="'+key+'">'+label+'</button>').join('')}
     function tabCount(key){if(key==='reminders')return state.reminders.filter(r=>!r.completed).length;return state.entries.filter(e=>e.space===key&&!e.archived).length}
@@ -378,8 +467,21 @@ const html = String.raw`<!doctype html>
       const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Recognition){toast('Voice transcription works best in Chrome or Edge','error');return}
       const recognition=new Recognition();recognition.continuous=true;recognition.interimResults=true;recognition.lang=navigator.language||'en-US';state.recognition=recognition;state.listening=true;render();
       let lastCommittedIndex=-1;const recentFinals=new Map();
-      recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){if(i<=lastCommittedIndex)continue;lastCommittedIndex=i;const fingerprint=transcript.toLowerCase().replace(/\s+/g,' ').trim(),seenAt=recentFinals.get(fingerprint)||0,currentTime=Date.now();if(fingerprint&&currentTime-seenAt<3500)continue;recentFinals.set(fingerprint,currentTime);for(const [key,time] of recentFinals){if(currentTime-time>10000)recentFinals.delete(key)}const command=fingerprint.replace(/[.!?]/g,'').trim();if(command==='stop'){recognition.stop();return}const committed=command==='period'?'.':(command==='comma'||command==='comme'?',':transcript);if(committed)insertAtCursor($('#entryContent'),committed);}else interim=transcript}const save=$('#saveState');if(save&&interim)save.textContent='Hearing: '+interim.slice(0,28)};
+      recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){if(i<=lastCommittedIndex)continue;lastCommittedIndex=i;const fingerprint=transcript.toLowerCase().replace(/\s+/g,' ').trim(),seenAt=recentFinals.get(fingerprint)||0,currentTime=Date.now();if(fingerprint&&currentTime-seenAt<3500)continue;recentFinals.set(fingerprint,currentTime);for(const [key,time] of recentFinals){if(currentTime-time>10000)recentFinals.delete(key)}const command=fingerprint.replace(/[.!?]/g,'').trim();if(command==='stop'){recognition.stop();return}const committed=command==='period'?'.':(command==='comma'||command==='comme'?',':novelSpeechSegment($('#entryContent'),transcript));if(committed)insertAtCursor($('#entryContent'),committed);}else interim=transcript}const save=$('#saveState');if(save&&interim)save.textContent='Hearing: '+interim.slice(0,28)};
       recognition.onerror=e=>{if(e.error!=='aborted')toast('Microphone: '+e.error,'error')};recognition.onend=()=>{state.listening=false;state.recognition=null;render()};recognition.start();
+    }
+    function novelSpeechSegment(el, transcript) {
+      if (!el || !transcript) return transcript;
+      const before = el.value.slice(0, el.selectionStart);
+      const originalWords = transcript.trim().split(/\s+/);
+      const normalizeWord = word => word.toLowerCase().replace(/[^a-z0-9']/gi, '');
+      const incoming = originalWords.map(normalizeWord).filter(Boolean);
+      const existing = before.trim().split(/\s+/).map(normalizeWord).filter(Boolean);
+      let overlap = 0;
+      for (let size = Math.min(existing.length, incoming.length); size > 0; size--) {
+        if (existing.slice(-size).join(' ') === incoming.slice(0, size).join(' ')) { overlap = size; break; }
+      }
+      return overlap >= originalWords.length ? '' : originalWords.slice(overlap).join(' ');
     }
     function insertAtCursor(el,text){if(!el)return;const start=el.selectionStart,end=el.selectionEnd;const before=el.value.slice(0,start),after=el.value.slice(end);const join=before&&text&&![".",","].includes(text[0])&&!/\s$/.test(before)?' ':'';el.value=before+join+text+after;const pos=(before+join+text).length;el.setSelectionRange(pos,pos);updateEntryField('content',el.value);autoGrow(el)}
 
@@ -403,11 +505,11 @@ const html = String.raw`<!doctype html>
 
 const manifest = JSON.stringify({
   name: 'Daybook — Second Brain', short_name: 'Daybook', start_url: '/', display: 'standalone',
-  background_color: '#f5f0e8', theme_color: '#5e745c',
+  background_color: '#0c0e0f', theme_color: '#ff5a00',
   icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
 }, null, 2);
 
-const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="120" fill="#5e745c"/><circle cx="256" cy="256" r="154" fill="none" stroke="#fffdf8" stroke-width="28"/><path d="M256 102a154 154 0 0 0 0 308V102Z" fill="#fffdf8"/></svg>`;
+const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="72" fill="#0c0e0f"/><rect x="52" y="52" width="408" height="408" rx="28" fill="none" stroke="#34383c" stroke-width="16"/><path d="M142 132h94c91 0 148 45 148 124s-57 124-148 124h-94V132Zm92 193c52 0 82-24 82-69s-30-69-82-69h-25v138h25Z" fill="#ff5a00"/></svg>`;
 const serviceWorker = `const CACHE='daybook-v2';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg'])))});self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===self.location.origin)e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});`;
 
 function build() {
