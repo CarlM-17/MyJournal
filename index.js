@@ -163,11 +163,31 @@ const html = String.raw`<!doctype html>
   <div id="toastRoot" class="toast-stack" aria-live="polite"></div>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
     const CONFIG = __APP_CONFIG__;
-    const configured = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
-    const supabase = configured ? createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey) : null;
+    const hasCloudConfig = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
+    let supabase = null;
+    let cloudAvailable = false;
+    let startupWarning = '';
+    async function importWithTimeout(url, timeoutMs = 5000) {
+      let timeout;
+      try {
+        return await Promise.race([
+          import(url),
+          new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('Timed out')), timeoutMs); })
+        ]);
+      } finally { clearTimeout(timeout); }
+    }
+    if (hasCloudConfig) {
+      try {
+        let library;
+        try { library = await importWithTimeout('https://esm.sh/@supabase/supabase-js@2'); }
+        catch { library = await importWithTimeout('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'); }
+        supabase = library.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+        cloudAvailable = true;
+      } catch {
+        startupWarning = 'Cloud sync could not start on this browser. Daybook opened in local mode instead.';
+      }
+    }
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
     const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -188,7 +208,7 @@ const html = String.raw`<!doctype html>
     const state = {
       session: null, entries: [], reminders: [], attachments: [], selectedId: null,
       tab: 'work', filter: 'all', search: '', saving: false, recognition: null,
-      listening: false, localMode: !configured, mobileEditorOpen: false
+      listening: false, localMode: !cloudAvailable, mobileEditorOpen: false
     };
 
     function toast(message, type = '') {
@@ -289,8 +309,8 @@ const html = String.raw`<!doctype html>
 
     function renderAuth(){
       $('#loading').classList.add('hidden'); $('#appRoot').classList.add('hidden'); const root=$('#authRoot');root.classList.remove('hidden');
-      root.innerHTML='<main class="auth-shell"><section class="auth-art"><div class="auth-logo">◒ '+escapeHtml(CONFIG.appName)+'</div><div class="auth-copy"><h1>Your thoughts,<br>kept close.</h1><p>Capture ideas, memories, photos and the things you cannot afford to forget.</p></div><small>Private by design · Built for quiet focus</small></section><section class="auth-card-wrap"><form class="auth-card" id="authForm"><span class="config-badge">'+(configured?'SECURE CLOUD SYNC':'LOCAL DEMO MODE')+'</span><h2>'+ (configured?'Welcome back':'Try your Daybook') +'</h2><p>'+(configured?'Enter your email and we will send you a secure sign-in link.':'Supabase is not configured yet. Explore the complete app now; your notes stay in this browser.')+'</p>'+(configured?'<div class="field"><label for="email">Email address</label><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>':'')+'<button class="button primary" type="submit">'+(configured?'Send sign-in link':'Open local journal')+'</button><div class="demo-note">'+(configured?'No password needed. Your journal is visible only to you.':'Add Supabase environment variables before deployment to enable accounts and cross-device sync.')+'</div></form></section></main>';
-      $('#authForm').onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;if(!configured){state.session={user:{id:'local-user',email:'Local journal'}};await startApp();return;}const email=$('#email').value.trim();const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});button.disabled=false;if(error)toast(error.message,'error');else{toast('Check your email for the sign-in link');button.textContent='Link sent';}};
+      root.innerHTML='<main class="auth-shell"><section class="auth-art"><div class="auth-logo">◒ '+escapeHtml(CONFIG.appName)+'</div><div class="auth-copy"><h1>Your thoughts,<br>kept close.</h1><p>Capture ideas, memories, photos and the things you cannot afford to forget.</p></div><small>Private by design · Built for quiet focus</small></section><section class="auth-card-wrap"><form class="auth-card" id="authForm"><span class="config-badge">'+(cloudAvailable?'SECURE CLOUD SYNC':'LOCAL MODE')+'</span><h2>'+ (cloudAvailable?'Welcome back':'Open your Daybook') +'</h2><p>'+(cloudAvailable?'Enter your email and we will send you a secure sign-in link.':(startupWarning||'Supabase is not configured yet. Notes on this device will stay in this browser.'))+'</p>'+(cloudAvailable?'<div class="field"><label for="email">Email address</label><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>':'')+'<button class="button primary" type="submit">'+(cloudAvailable?'Send sign-in link':'Open local journal')+'</button><div class="demo-note">'+(cloudAvailable?'No password needed. Your journal is visible only to you.':(hasCloudConfig?'Check this browser’s connection or content-blocking settings to restore cloud sync.':'Add Supabase environment variables before deployment to enable accounts and cross-device sync.'))+'</div></form></section></main>';
+      $('#authForm').onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;if(!cloudAvailable){state.session={user:{id:'local-user',email:'Local journal'}};await startApp();return;}const email=$('#email').value.trim();const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});button.disabled=false;if(error)toast(error.message,'error');else{toast('Check your email for the sign-in link');button.textContent='Link sent';}};
     }
 
     function shellHtml(){return '<div class="app"><aside class="sidebar"><div class="brand"><span class="brand-mark">◒</span>'+escapeHtml(CONFIG.appName)+'</div><button class="new-button" data-action="new">'+icon('plus')+' New entry</button><nav class="nav">'+navButtons()+'</nav><div class="sidebar-foot"><div class="user-chip"><div class="user-email">'+escapeHtml(state.session?.user?.email||'Local journal')+'</div></div><button class="icon-button" data-action="theme" title="Toggle theme">'+icon('sun')+'</button><button class="icon-button" data-action="logout" title="Sign out">'+icon('logout')+'</button></div></aside><section class="list-pane '+(state.tab==='reminders'?'reminders-active':'')+'" id="listPane"><div class="mobile-top"><div class="mobile-brand">◒ '+escapeHtml(CONFIG.appName)+'</div><button class="icon-button" data-action="theme">'+icon('sun')+'</button></div><div class="list-header">'+listHeaderHtml()+'</div><div class="entry-list" id="entryList">'+entryListHtml()+'</div><div id="mobileReminderHost" class="hidden">'+(state.tab==='reminders'?remindersHtml():'')+'</div></section><main class="editor-pane '+(state.mobileEditorOpen?'mobile-open':'')+'" id="editorPane">'+mainPaneHtml()+'</main><button class="mobile-new" data-action="new" aria-label="New entry">+</button><nav class="bottom-nav">'+bottomNavHtml()+'</nav></div>'}
@@ -357,7 +377,8 @@ const html = String.raw`<!doctype html>
       if(state.listening){state.recognition?.stop();return}
       const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Recognition){toast('Voice transcription works best in Chrome or Edge','error');return}
       const recognition=new Recognition();recognition.continuous=true;recognition.interimResults=true;recognition.lang=navigator.language||'en-US';state.recognition=recognition;state.listening=true;render();
-      let committed='';recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){const command=transcript.toLowerCase().replace(/[.!?]/g,'').trim();if(command==='stop'){recognition.stop();return}if(command==='period'){committed+='.';}else if(command==='comma'||command==='comme'){committed+=',';}else{committed+=(committed&&!/\s$/.test(committed)?' ':'')+transcript;}}else interim=transcript}if(committed){insertAtCursor($('#entryContent'),committed);committed=''}const save=$('#saveState');if(save&&interim)save.textContent='Hearing: '+interim.slice(0,28)};
+      let lastCommittedIndex=-1;const recentFinals=new Map();
+      recognition.onresult=event=>{let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const transcript=event.results[i][0].transcript.trim();if(event.results[i].isFinal){if(i<=lastCommittedIndex)continue;lastCommittedIndex=i;const fingerprint=transcript.toLowerCase().replace(/\s+/g,' ').trim(),seenAt=recentFinals.get(fingerprint)||0,currentTime=Date.now();if(fingerprint&&currentTime-seenAt<3500)continue;recentFinals.set(fingerprint,currentTime);for(const [key,time] of recentFinals){if(currentTime-time>10000)recentFinals.delete(key)}const command=fingerprint.replace(/[.!?]/g,'').trim();if(command==='stop'){recognition.stop();return}const committed=command==='period'?'.':(command==='comma'||command==='comme'?',':transcript);if(committed)insertAtCursor($('#entryContent'),committed);}else interim=transcript}const save=$('#saveState');if(save&&interim)save.textContent='Hearing: '+interim.slice(0,28)};
       recognition.onerror=e=>{if(e.error!=='aborted')toast('Microphone: '+e.error,'error')};recognition.onend=()=>{state.listening=false;state.recognition=null;render()};recognition.start();
     }
     function insertAtCursor(el,text){if(!el)return;const start=el.selectionStart,end=el.selectionEnd;const before=el.value.slice(0,start),after=el.value.slice(end);const join=before&&text&&![".",","].includes(text[0])&&!/\s$/.test(before)?' ':'';el.value=before+join+text+after;const pos=(before+join+text).length;el.setSelectionRange(pos,pos);updateEntryField('content',el.value);autoGrow(el)}
@@ -367,7 +388,7 @@ const html = String.raw`<!doctype html>
     function blobToDataUrl(blob){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(blob)})}
     async function deleteAttachment(id){const a=state.attachments.find(x=>x.id===id);if(!a)return;if(!confirm('Remove this photo?'))return;try{if(state.localMode){state.attachments=state.attachments.filter(x=>x.id!==id);localWrite('attachments',state.attachments)}else{const del=await supabase.storage.from('journal-images').remove([a.storage_path]);if(del.error)throw del.error;const row=await supabase.from('attachments').delete().eq('id',id);if(row.error)throw row.error;state.attachments=state.attachments.filter(x=>x.id!==id)}render()}catch(error){toast(error.message,'error')}}
 
-    async function signOut(){if(state.listening)state.recognition?.stop();if(configured)await supabase.auth.signOut();state.session=null;state.entries=[];renderAuth()}
+    async function signOut(){if(state.listening)state.recognition?.stop();if(cloudAvailable)await supabase.auth.signOut();state.session=null;state.entries=[];renderAuth()}
     function checkDueReminders(){const due=state.reminders.filter(r=>!r.completed&&new Date(r.due_at)<=new Date()&&!sessionStorage.getItem('notified-'+r.id));due.forEach(r=>{sessionStorage.setItem('notified-'+r.id,'1');toast('Reminder: '+r.title);if(Notification.permission==='granted')new Notification(CONFIG.appName,{body:r.title})})}
     async function startApp(){try{$('#loading').classList.remove('hidden');await data.load();const work=state.entries.find(e=>e.space==='work'&&!e.archived);state.selectedId=work?.id||null;render();checkDueReminders();setInterval(checkDueReminders,60000)}catch(error){$('#loading').classList.add('hidden');toast(error.message||'Could not load your journal','error');renderAuth()}}
 
@@ -375,7 +396,7 @@ const html = String.raw`<!doctype html>
     window.addEventListener('online',()=>toast('Back online'));window.addEventListener('offline',()=>toast('Offline — drafts stay on this device'));
     if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-    if(configured){const {data:{session}}=await supabase.auth.getSession();state.session=session;supabase.auth.onAuthStateChange((_event,next)=>{if(next&&!state.session){state.session=next;startApp()}else state.session=next});if(session)await startApp();else renderAuth()}else renderAuth();
+    if(cloudAvailable){const {data:{session}}=await supabase.auth.getSession();state.session=session;supabase.auth.onAuthStateChange((_event,next)=>{if(next&&!state.session){state.session=next;startApp()}else state.session=next});if(session)await startApp();else renderAuth()}else renderAuth();
   </script>
 </body>
 </html>`;
@@ -387,7 +408,7 @@ const manifest = JSON.stringify({
 }, null, 2);
 
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="120" fill="#5e745c"/><circle cx="256" cy="256" r="154" fill="none" stroke="#fffdf8" stroke-width="28"/><path d="M256 102a154 154 0 0 0 0 308V102Z" fill="#fffdf8"/></svg>`;
-const serviceWorker = `const CACHE='daybook-v1';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg']))));self.addEventListener('fetch',e=>{if(e.request.method==='GET')e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});`;
+const serviceWorker = `const CACHE='daybook-v2';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg'])))});self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===self.location.origin)e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});`;
 
 function build() {
   fs.mkdirSync(DIST, { recursive: true });
