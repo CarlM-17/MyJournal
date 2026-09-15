@@ -548,10 +548,22 @@ const html = String.raw`<!doctype html>
     function reminderItemHtml(r){const overdue=!r.completed&&new Date(r.due_at)<new Date();return '<div class="reminder-item '+(r.completed?'done':'')+'"><button class="check '+(r.completed?'done':'')+'" data-toggle-reminder="'+r.id+'" aria-label="'+(r.completed?'Mark incomplete':'Complete reminder')+'">'+(r.completed?icon('check',15):'')+'</button><button class="reminder-main" style="border:0;background:transparent;text-align:left;padding:0" data-edit-reminder="'+r.id+'"><div class="reminder-name">'+escapeHtml(r.title)+'</div><div class="reminder-date '+(overdue?'overdue':'')+'">'+escapeHtml(formatDue(r.due_at))+' · '+escapeHtml(tabName(r.space))+'</div></button><button class="icon-button" data-delete-reminder="'+r.id+'" aria-label="Delete reminder">'+icon('trash',15)+'</button></div>'}
     function formatDue(value){return new Date(value).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
 
-    function render(preserveReading=false){const root=$('#appRoot'),oldPane=$('#editorPane'),oldContent=$('#entryContent');const reading=preserveReading&&oldPane&&oldContent?{pane:oldPane.scrollTop,content:oldContent.scrollTop}:null;$('#loading').classList.add('hidden');$('#authRoot').classList.add('hidden');root.classList.remove('hidden');root.innerHTML=shellHtml();bindEvents();if(reading){const pane=$('#editorPane'),content=$('#entryContent');if(pane&&content){content.scrollTop=reading.content;pane.scrollTop=reading.pane;requestAnimationFrame(()=>{if($('#editorPane')===pane){content.scrollTop=reading.content;pane.scrollTop=reading.pane}})}}}
+    function render(){
+      const root=$('#appRoot'),oldPane=$('#editorPane'),oldContent=$('#entryContent');
+      const sameNote=oldContent?.dataset.entryId===state.selectedId&&oldContent?.dataset.space===state.tab;
+      const active=document.activeElement,focused=sameNote&&['entryTitle','entryContent'].includes(active?.id)?{id:active.id,start:active.selectionStart,end:active.selectionEnd}:null;
+      const reading=sameNote&&oldPane?{pane:oldPane.scrollTop,content:oldContent.scrollTop}:null;
+      $('#loading').classList.add('hidden');$('#authRoot').classList.add('hidden');root.classList.remove('hidden');root.innerHTML=shellHtml();bindEvents();
+      if(!reading)return;
+      const pane=$('#editorPane'),content=$('#entryContent');if(!pane||!content)return;
+      if(focused){const field=$('#'+focused.id);field?.focus({preventScroll:true});field?.setSelectionRange(focused.start,focused.end)}
+      const restore=()=>{if($('#editorPane')!==pane)return;content.scrollTop=reading.content;pane.scrollTop=reading.pane};
+      restore();requestAnimationFrame(restore);setTimeout(restore,80);
+    }
     function renderEntryListOnly(){const list=$('#entryList');if(list){list.innerHTML=entryListHtml();bindEntryCardEvents()}$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));}
     function bindEntryCardEvents(){$$('[data-entry]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.selectedId=b.dataset.entry;state.mobileEditorOpen=true;render()})}
     function bindEvents(){
+      const openContent=$('#entryContent');if(openContent){openContent.dataset.entryId=selectedEntry()?.id||'';openContent.dataset.space=state.tab}
       const crumb=$('.crumb');if(crumb&&selectedEntry())crumb.textContent=tabName(selectedEntry().space)+(selectedEntry().folder_id?' / '+folderName(selectedEntry().folder_id):'')+' note';
       const header=$('.editor-top'),saveState=$('#saveState');
       if(header&&saveState){const count=document.createElement('span');count.id='characterCount';count.className='character-count';header.insertBefore(count,saveState);const jump=document.createElement('button');jump.type='button';jump.className='jump-end';jump.textContent='↓ Bottom';jump.setAttribute('aria-label','Jump to bottom of note');jump.onclick=jumpToEntryEnd;header.insertBefore(jump,$('[data-action="more"]'));const floating=document.createElement('div');floating.className='jump-floating';floating.innerHTML='<span id="floatingCharacterCount"></span><button type="button" aria-label="Jump to bottom of note">↓ Bottom</button>';floating.querySelector('button').onclick=jumpToEntryEnd;$('#editorPane').appendChild(floating);updateSaveState();}
@@ -700,7 +712,7 @@ const html = String.raw`<!doctype html>
         if(sameOpenNote&&!tabsChanged&&!foldersChanged&&!attachmentsChanged&&!remindersChanged){
           if(!activeField){const title=$('#entryTitle'),content=$('#entryContent');if(title&&title.value!==updated.title)title.value=updated.title||'';if(content&&content.value!==updated.content){content.value=updated.content||'';autoGrow(content,true)}updateSaveState()}
           renderEntryListOnly();$$('[data-tab] .count').forEach(count=>{const tab=count.closest('[data-tab]');if(tab)count.textContent=tabCount(tab.dataset.tab)});$$('[data-folder] .folder-count').forEach(count=>{const folder=count.closest('[data-folder]');if(folder)count.textContent=folder.dataset.folder?folderCount(folder.dataset.folder):tabCount(state.tab)});
-        }else render(Boolean(sameOpenNote));
+        }else render();
         if(receivedNew)toast('New note synced from another device');
       }catch(error){console.warn('Cloud refresh paused:',error.message)}finally{state.syncing=false}
     }
@@ -745,7 +757,7 @@ const manifest = JSON.stringify({
 }, null, 2);
 
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="72" fill="#0c0e0f"/><rect x="52" y="52" width="408" height="408" rx="28" fill="none" stroke="#34383c" stroke-width="16"/><path d="M142 132h94c91 0 148 45 148 124s-57 124-148 124h-94V132Zm92 193c52 0 82-24 82-69s-30-69-82-69h-25v138h25Z" fill="#ff5a00"/></svg>`;
-const serviceWorker = `const CACHE='daybook-v4';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/journal-icon.png'])))});self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===self.location.origin)e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus' in client){client.navigate('/');return client.focus()}}return clients.openWindow('/')}))});`;
+const serviceWorker = `const CACHE='daybook-v5';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/journal-icon.png'])))});self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===self.location.origin)e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus' in client){client.navigate('/');return client.focus()}}return clients.openWindow('/')}))});`;
 
 function build() {
   if (!fs.existsSync(APP_ICON)) throw new Error('Missing required app icon: MyJournal_icon.png');
