@@ -548,8 +548,9 @@ const html = String.raw`<!doctype html>
     function reminderItemHtml(r){const overdue=!r.completed&&new Date(r.due_at)<new Date();return '<div class="reminder-item '+(r.completed?'done':'')+'"><button class="check '+(r.completed?'done':'')+'" data-toggle-reminder="'+r.id+'" aria-label="'+(r.completed?'Mark incomplete':'Complete reminder')+'">'+(r.completed?icon('check',15):'')+'</button><button class="reminder-main" style="border:0;background:transparent;text-align:left;padding:0" data-edit-reminder="'+r.id+'"><div class="reminder-name">'+escapeHtml(r.title)+'</div><div class="reminder-date '+(overdue?'overdue':'')+'">'+escapeHtml(formatDue(r.due_at))+' · '+escapeHtml(tabName(r.space))+'</div></button><button class="icon-button" data-delete-reminder="'+r.id+'" aria-label="Delete reminder">'+icon('trash',15)+'</button></div>'}
     function formatDue(value){return new Date(value).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
 
-    function render(){const root=$('#appRoot');$('#loading').classList.add('hidden');$('#authRoot').classList.add('hidden');root.classList.remove('hidden');root.innerHTML=shellHtml();bindEvents();}
-    function renderEntryListOnly(){const list=$('#entryList');if(list)list.innerHTML=entryListHtml();$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));}
+    function render(preserveReading=false){const root=$('#appRoot'),oldPane=$('#editorPane'),oldContent=$('#entryContent');const reading=preserveReading&&oldPane&&oldContent?{pane:oldPane.scrollTop,content:oldContent.scrollTop}:null;$('#loading').classList.add('hidden');$('#authRoot').classList.add('hidden');root.classList.remove('hidden');root.innerHTML=shellHtml();bindEvents();if(reading){const pane=$('#editorPane'),content=$('#entryContent');if(pane&&content){content.scrollTop=reading.content;pane.scrollTop=reading.pane;requestAnimationFrame(()=>{if($('#editorPane')===pane){content.scrollTop=reading.content;pane.scrollTop=reading.pane}})}}}
+    function renderEntryListOnly(){const list=$('#entryList');if(list){list.innerHTML=entryListHtml();bindEntryCardEvents()}$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));}
+    function bindEntryCardEvents(){$$('[data-entry]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.selectedId=b.dataset.entry;state.mobileEditorOpen=true;render()})}
     function bindEvents(){
       const crumb=$('.crumb');if(crumb&&selectedEntry())crumb.textContent=tabName(selectedEntry().space)+(selectedEntry().folder_id?' / '+folderName(selectedEntry().folder_id):'')+' note';
       const header=$('.editor-top'),saveState=$('#saveState');
@@ -557,7 +558,7 @@ const html = String.raw`<!doctype html>
       $$('[data-action="new"]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();createEntry(state.tab==='reminders'?(state.tabs[0]?.id||'work'):state.tab)});
       $$('[data-tab]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.tab=b.dataset.tab;state.folderId=null;state.search='';state.filter='all';state.mobileEditorOpen=false;if(state.tab!=='reminders'){const first=state.entries.find(e=>e.space===state.tab&&!e.archived);state.selectedId=first?.id||null;}render();});
       $$('[data-folder]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.folderId=b.dataset.folder||null;state.mobileEditorOpen=false;state.selectedId=visibleEntries()[0]?.id||null;render();});
-      $$('[data-entry]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.selectedId=b.dataset.entry;state.mobileEditorOpen=true;render();});
+      bindEntryCardEvents();
       $$('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render();});
       $('#searchInput')?.addEventListener('input',e=>{state.search=e.target.value;renderEntryListOnly()});
       $('#entryTitle')?.addEventListener('input',e=>updateEntryField('title',e.target.value));
@@ -685,12 +686,21 @@ const html = String.raw`<!doctype html>
           supabase.from('journal_folders').select('*').order('position',{ascending:true})
         ]);
         const error=entries.error||reminders.error||attachments.error||tabs.error||folders.error;if(error)throw error;
-        const activeField=['entryTitle','entryContent'].includes(document.activeElement?.id);const current=selectedEntry();
+        const activeField=['entryTitle','entryContent'].includes(document.activeElement?.id),current=selectedEntry(),oldTabs=state.tabs,oldFolders=state.folders,oldReminders=state.reminders,oldAttachments=state.attachments;
         const oldIds=new Set(state.entries.map(item=>item.id));state.entries=entries.data;
-        if(activeField&&current){const index=state.entries.findIndex(item=>item.id===current.id);if(index>=0)state.entries[index]=current;else state.entries.unshift(current)}
+        if(current&&(activeField||state.saving||localStorage.getItem('daybook-draft-'+current.id))){const index=state.entries.findIndex(item=>item.id===current.id);if(index>=0)state.entries[index]=current;else state.entries.unshift(current)}
         state.reminders=reminders.data;state.attachments=attachments.data;state.tabs=tabs.data.length?tabs.data:state.tabs;state.folders=folders.data;if(state.folderId&&!state.folders.some(folder=>folder.id===state.folderId))state.folderId=null;if(state.tab!=='reminders'&&!state.tabs.some(tab=>tab.id===state.tab)){state.tab=state.tabs[0]?.id||'work';state.folderId=null;state.selectedId=state.entries.find(entry=>entry.space===state.tab&&!entry.archived)?.id||null}await hydrateAttachmentUrls();
         const receivedNew=state.entries.some(item=>!oldIds.has(item.id));
-        if(activeField&&state.tab!=='reminders')renderEntryListOnly();else render();
+        const signature=(items,fields)=>JSON.stringify(items.map(item=>fields.map(field=>item[field])));
+        const tabsChanged=signature(oldTabs,['id','name','color','position'])!==signature(state.tabs,['id','name','color','position']);
+        const foldersChanged=signature(oldFolders,['id','tab_id','name','position'])!==signature(state.folders,['id','tab_id','name','position']);
+        const attachmentsChanged=signature(oldAttachments.filter(item=>item.entry_id===current?.id),['id','storage_path'])!==signature(state.attachments.filter(item=>item.entry_id===current?.id),['id','storage_path']);
+        const remindersChanged=signature(oldReminders.filter(item=>item.entry_id===current?.id),['id','title','due_at','completed'])!==signature(state.reminders.filter(item=>item.entry_id===current?.id),['id','title','due_at','completed']);
+        const updated=selectedEntry(),sameOpenNote=state.tab!=='reminders'&&current&&updated?.id===current.id&&$('#entryContent');
+        if(sameOpenNote&&!tabsChanged&&!foldersChanged&&!attachmentsChanged&&!remindersChanged){
+          if(!activeField){const title=$('#entryTitle'),content=$('#entryContent');if(title&&title.value!==updated.title)title.value=updated.title||'';if(content&&content.value!==updated.content){content.value=updated.content||'';autoGrow(content,true)}updateSaveState()}
+          renderEntryListOnly();$$('[data-tab] .count').forEach(count=>{const tab=count.closest('[data-tab]');if(tab)count.textContent=tabCount(tab.dataset.tab)});$$('[data-folder] .folder-count').forEach(count=>{const folder=count.closest('[data-folder]');if(folder)count.textContent=folder.dataset.folder?folderCount(folder.dataset.folder):tabCount(state.tab)});
+        }else render(Boolean(sameOpenNote));
         if(receivedNew)toast('New note synced from another device');
       }catch(error){console.warn('Cloud refresh paused:',error.message)}finally{state.syncing=false}
     }
