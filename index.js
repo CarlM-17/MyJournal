@@ -243,6 +243,8 @@ const html = String.raw`<!doctype html>
     .tab-manager-row{border-radius:10px;padding:12px 13px;background:color-mix(in srgb,var(--row-color,#ff6a1a) 7%,var(--surface));border-color:color-mix(in srgb,var(--row-color,#ff6a1a) 20%,var(--line))}.tab-card-copy{display:grid;gap:3px;min-width:0;flex:1}.tab-card-copy strong{overflow:hidden;text-overflow:ellipsis}.tab-card-copy small{color:var(--muted);font-size:11px}.tab-actions{display:flex;gap:6px}.mini-button{width:38px;height:38px;padding:0;display:grid;place-items:center}.tab-color-field{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);border-radius:4px}.tab-color-field input{width:48px!important;height:38px;padding:2px!important;cursor:pointer}.tab-color-field span{font-size:13px;color:var(--muted)}
     .bottom-nav button{--tab-color:#ff6a1a;border:1px solid color-mix(in srgb,var(--tab-color) 18%,var(--line))!important;background:color-mix(in srgb,var(--tab-color) 7%,transparent)!important;color:color-mix(in srgb,var(--ink) 72%,var(--tab-color))!important;padding:10px 13px!important}.bottom-nav button.active{background:color-mix(in srgb,var(--tab-color) 22%,var(--surface))!important;border-color:color-mix(in srgb,var(--tab-color) 60%,var(--line))!important;color:var(--ink)!important;box-shadow:inset 0 -3px var(--tab-color)}
     @media(max-width:760px){.bottom-nav{gap:6px}.bottom-nav button{min-width:96px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tab-manager-row{align-items:center}.tab-actions{flex:0 0 auto}.modal .tab-manager{max-height:48vh;overflow:auto}}
+    .editor{padding-bottom:max(190px,25vh)}.jump-floating{position:fixed;right:24px;bottom:96px;z-index:9;display:flex;align-items:center;gap:9px;padding:7px 9px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:5px}.jump-floating span{font-size:11px;color:var(--muted);white-space:nowrap}.jump-floating button{border:0;background:var(--accent);color:white;border-radius:3px;padding:8px 10px;font-size:12px;font-weight:800;white-space:nowrap}.jump-floating button:hover{background:var(--accent-deep)}
+    @media(max-width:760px){.editor{padding-bottom:max(190px,25vh)}.jump-floating{right:15px;bottom:max(81px,calc(env(safe-area-inset-bottom) + 76px));z-index:13}.jump-floating button{min-height:38px}}
   </style>
 </head>
 <body>
@@ -497,7 +499,7 @@ const html = String.raw`<!doctype html>
       try{await data.saveEntry(entry);localStorage.removeItem('daybook-draft-'+entry.id);state.saving=false;updateSaveState();renderEntryListOnly();}
       catch(error){state.saving=false;updateSaveState('Could not save');toast(error.message||'Could not save','error');}
     }
-    function updateSaveState(forced){const el=$('#saveState');if(el)el.textContent=forced||(state.saving?'Saving…':'Saved');const count=$('#characterCount'),content=$('#entryContent');if(count&&content)count.textContent=content.value.length.toLocaleString()+' characters';}
+    function updateSaveState(forced){const el=$('#saveState');if(el)el.textContent=forced||(state.saving?'Saving…':'Saved');const content=$('#entryContent');if(!content)return;const length=content.value.length.toLocaleString(),count=$('#characterCount'),floating=$('#floatingCharacterCount');if(count)count.textContent=length+' characters';if(floating)floating.textContent=length+' characters';}
 
     function renderAuth(){
       $('#loading').classList.add('hidden'); $('#appRoot').classList.add('hidden'); const root=$('#authRoot');root.classList.remove('hidden');
@@ -551,7 +553,7 @@ const html = String.raw`<!doctype html>
     function bindEvents(){
       const crumb=$('.crumb');if(crumb&&selectedEntry())crumb.textContent=tabName(selectedEntry().space)+(selectedEntry().folder_id?' / '+folderName(selectedEntry().folder_id):'')+' note';
       const header=$('.editor-top'),saveState=$('#saveState');
-      if(header&&saveState){const count=document.createElement('span');count.id='characterCount';count.className='character-count';header.insertBefore(count,saveState);const jump=document.createElement('button');jump.type='button';jump.className='jump-end';jump.textContent='↓ Bottom';jump.setAttribute('aria-label','Jump to bottom of note');jump.onclick=jumpToEntryEnd;header.insertBefore(jump,$('[data-action="more"]'));updateSaveState();}
+      if(header&&saveState){const count=document.createElement('span');count.id='characterCount';count.className='character-count';header.insertBefore(count,saveState);const jump=document.createElement('button');jump.type='button';jump.className='jump-end';jump.textContent='↓ Bottom';jump.setAttribute('aria-label','Jump to bottom of note');jump.onclick=jumpToEntryEnd;header.insertBefore(jump,$('[data-action="more"]'));const floating=document.createElement('div');floating.className='jump-floating';floating.innerHTML='<span id="floatingCharacterCount"></span><button type="button" aria-label="Jump to bottom of note">↓ Bottom</button>';floating.querySelector('button').onclick=jumpToEntryEnd;$('#editorPane').appendChild(floating);updateSaveState();}
       $$('[data-action="new"]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();createEntry(state.tab==='reminders'?(state.tabs[0]?.id||'work'):state.tab)});
       $$('[data-tab]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.tab=b.dataset.tab;state.folderId=null;state.search='';state.filter='all';state.mobileEditorOpen=false;if(state.tab!=='reminders'){const first=state.entries.find(e=>e.space===state.tab&&!e.archived);state.selectedId=first?.id||null;}render();});
       $$('[data-folder]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.folderId=b.dataset.folder||null;state.mobileEditorOpen=false;state.selectedId=visibleEntries()[0]?.id||null;render();});
@@ -561,6 +563,7 @@ const html = String.raw`<!doctype html>
       $('#entryTitle')?.addEventListener('input',e=>updateEntryField('title',e.target.value));
       $('#entryTitle')?.addEventListener('focus',()=>state.voiceTarget='title');
       $('#entryContent')?.addEventListener('input',e=>{autoGrow(e.target);updateEntryField('content',e.target.value)});
+      $('#entryContent')?.addEventListener('wheel',e=>{const pane=e.currentTarget.closest('.editor-pane');if(!pane||!e.deltaY)return;e.preventDefault();pane.scrollTop+=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?pane.clientHeight:1)},{passive:false});
       $('#entryContent')?.addEventListener('focus',()=>state.voiceTarget='content');
       $('#entryContent')?.addEventListener('blur',e=>autoGrow(e.target,true));
       $('#entryContent')&&autoGrow($('#entryContent'),true);
