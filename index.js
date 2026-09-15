@@ -179,6 +179,7 @@ const html = String.raw`<!doctype html>
     .card-meta{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.card-title{font-weight:750;margin:7px 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-preview{color:var(--muted);font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.pin{color:var(--work)}
     .empty{padding:50px 22px;text-align:center;color:var(--muted)}.empty-illustration{font-size:40px;margin-bottom:12px}.empty strong{display:block;color:var(--ink);margin-bottom:6px}
     .editor-pane{background:var(--surface);min-width:0;position:relative;overflow:auto}.editor{max-width:820px;margin:0 auto;padding:30px 58px 120px}.editor-top{display:flex;align-items:center;gap:9px;margin-bottom:35px}.crumb{font-size:12px;color:var(--muted);font-weight:750;text-transform:uppercase;letter-spacing:.1em}.save-state{margin-left:auto;font-size:12px;color:var(--muted)}
+    .editor-top{flex-wrap:wrap}.character-count{font-size:12px;color:var(--muted);white-space:nowrap}.jump-end{border:1px solid var(--line);background:transparent;color:var(--muted);padding:7px 9px;font-size:12px;font-weight:750;white-space:nowrap}.jump-end:hover{border-color:var(--accent);color:var(--accent)}
     .title-capture{display:flex;align-items:center;gap:10px;margin-bottom:17px}.editor-title{width:100%;min-width:0;border:0;background:transparent;font:700 36px/1.2 Georgia,serif;padding:0;margin:0}.editor-title::placeholder{color:color-mix(in srgb,var(--muted) 42%,transparent)}.title-mic{flex:0 0 auto}
     .editor-content{width:100%;min-height:330px;resize:none;overflow:hidden;border:0;background:transparent;font:400 17px/1.75 Georgia,serif;padding:0}.editor-content::placeholder{color:color-mix(in srgb,var(--muted) 55%,transparent)}
     .tool-row{position:fixed;left:calc(580px + (100vw - 580px)/2);transform:translateX(-50%);bottom:22px;z-index:8;display:flex;align-items:center;gap:8px;padding:9px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);width:max-content;max-width:100%}
@@ -231,6 +232,7 @@ const html = String.raw`<!doctype html>
     [data-theme="light"] .tool-row{background:var(--surface)}
     .photo,.modal,.auth-card{border-radius:5px}.reminder-item{border:1px solid var(--line);padding:16px;margin-bottom:8px}.check{border-radius:3px;border-color:var(--accent)}
     .button{border-radius:4px;text-transform:uppercase;letter-spacing:.04em}.button.primary{background:#f4f3ef;color:#101214}.button.primary:hover{background:var(--accent);border-color:var(--accent);color:white}
+    .jump-end{border-radius:4px}
     .modal{border:1px solid var(--line)}.modal h2,.auth-card h2{font-family:var(--font);font-weight:500;text-transform:uppercase;letter-spacing:-.02em}.field input,.field textarea,.field select{border-radius:4px;background:#0c0e0f}.auth-shell{background:var(--paper)}
     .auth-art{background:#0a0b0c;border-right:1px solid var(--line)}.auth-art:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:48px 48px}.auth-art:after{content:'D/';right:28px;bottom:-40px;font:900 240px/1 var(--font);color:rgba(255,90,0,.12)}.auth-logo{font:700 20px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);position:relative;z-index:1}.auth-copy h1{font-family:var(--font);font-weight:500;text-transform:uppercase;letter-spacing:-.055em}.auth-card{border:1px solid var(--line);box-shadow:none}.config-badge{background:var(--accent-soft);color:var(--accent)}
     .bottom-nav{border-radius:5px!important;background:#0d0f10!important}.bottom-nav button{border-radius:3px!important;text-transform:uppercase;letter-spacing:.05em;min-width:82px}.bottom-nav button.active{background:#f4f3ef!important;color:#101214!important}.mobile-new{display:none;border-radius:4px!important;background:var(--accent)!important;color:#fff!important}
@@ -495,7 +497,7 @@ const html = String.raw`<!doctype html>
       try{await data.saveEntry(entry);localStorage.removeItem('daybook-draft-'+entry.id);state.saving=false;updateSaveState();renderEntryListOnly();}
       catch(error){state.saving=false;updateSaveState('Could not save');toast(error.message||'Could not save','error');}
     }
-    function updateSaveState(forced){const el=$('#saveState');if(el)el.textContent=forced||(state.saving?'Saving…':'Saved');}
+    function updateSaveState(forced){const el=$('#saveState');if(el)el.textContent=forced||(state.saving?'Saving…':'Saved');const count=$('#characterCount'),content=$('#entryContent');if(count&&content)count.textContent=content.value.length.toLocaleString()+' characters';}
 
     function renderAuth(){
       $('#loading').classList.add('hidden'); $('#appRoot').classList.add('hidden'); const root=$('#authRoot');root.classList.remove('hidden');
@@ -548,6 +550,8 @@ const html = String.raw`<!doctype html>
     function renderEntryListOnly(){const list=$('#entryList');if(list)list.innerHTML=entryListHtml();$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));}
     function bindEvents(){
       const crumb=$('.crumb');if(crumb&&selectedEntry())crumb.textContent=tabName(selectedEntry().space)+(selectedEntry().folder_id?' / '+folderName(selectedEntry().folder_id):'')+' note';
+      const header=$('.editor-top'),saveState=$('#saveState');
+      if(header&&saveState){const count=document.createElement('span');count.id='characterCount';count.className='character-count';header.insertBefore(count,saveState);const jump=document.createElement('button');jump.type='button';jump.className='jump-end';jump.textContent='↓ Bottom';jump.setAttribute('aria-label','Jump to bottom of note');jump.onclick=jumpToEntryEnd;header.insertBefore(jump,$('[data-action="more"]'));updateSaveState();}
       $$('[data-action="new"]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();createEntry(state.tab==='reminders'?(state.tabs[0]?.id||'work'):state.tab)});
       $$('[data-tab]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.tab=b.dataset.tab;state.folderId=null;state.search='';state.filter='all';state.mobileEditorOpen=false;if(state.tab!=='reminders'){const first=state.entries.find(e=>e.space===state.tab&&!e.archived);state.selectedId=first?.id||null;}render();});
       $$('[data-folder]').forEach(b=>b.onclick=async()=>{if(state.listening)await stopVoice();state.folderId=b.dataset.folder||null;state.mobileEditorOpen=false;state.selectedId=visibleEntries()[0]?.id||null;render();});
@@ -583,6 +587,7 @@ const html = String.raw`<!doctype html>
       $$('[data-delete-attachment]').forEach(b=>b.onclick=()=>deleteAttachment(b.dataset.deleteAttachment));
     }
     function autoGrow(el,forceMeasure=false){if(!el)return;const pane=el.closest('.editor-pane'),previousScroll=pane?.scrollTop||0,atEnd=document.activeElement===el&&el.selectionEnd>=el.value.length-1,current=el.getBoundingClientRect().height;if(forceMeasure)el.style.height='auto';const desired=Math.max(330,el.scrollHeight);if(forceMeasure||desired>current+1)el.style.height=desired+'px';if(!pane)return;if(!atEnd){pane.scrollTop=previousScroll;return}requestAnimationFrame(()=>{const paneRect=pane.getBoundingClientRect(),editorRect=el.getBoundingClientRect(),safeBottom=paneRect.bottom-(innerWidth<=760?105:95);if(editorRect.bottom>safeBottom)pane.scrollTop+=editorRect.bottom-safeBottom})}
+    function jumpToEntryEnd(){const content=$('#entryContent'),pane=$('#editorPane');if(!content||!pane)return;autoGrow(content,true);content.focus();content.setSelectionRange(content.value.length,content.value.length);requestAnimationFrame(()=>{content.scrollTop=content.scrollHeight;pane.scrollTop=pane.scrollHeight});}
 
     function showModal(content){$('#modalRoot').innerHTML='<div class="modal-backdrop" id="modalBackdrop"><div class="modal" role="dialog" aria-modal="true">'+content+'</div></div>';$('#modalBackdrop').onclick=e=>{if(e.target===e.currentTarget)closeModal()}}
     function closeModal(){$('#modalRoot').innerHTML=''}
