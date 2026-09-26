@@ -190,7 +190,7 @@ const html = String.raw`<!doctype html>
     .reminder-view{max-width:760px;margin:0 auto;padding:29px 48px 120px}.reminder-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}.reminder-title{font:700 32px Georgia,serif;margin:0}.reminder-groups{display:grid;gap:28px}.group-title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;font-weight:800}.reminder-item{display:flex;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line);padding:14px 4px}.check{width:23px;height:23px;border:2px solid var(--accent);border-radius:50%;background:transparent;flex:0 0 auto;margin-top:1px}.check.done{background:var(--accent);color:white}.reminder-main{flex:1;min-width:0}.reminder-item.done .reminder-name{text-decoration:line-through;color:var(--muted)}.reminder-name{font-weight:750}.reminder-date{font-size:12px;color:var(--muted);margin-top:4px}.overdue{color:var(--danger)}
     .modal-backdrop{position:fixed;inset:0;background:rgba(15,17,14,.42);backdrop-filter:blur(4px);z-index:20;display:grid;place-items:center;padding:20px}.modal{width:min(500px,100%);max-height:90vh;overflow:auto;background:var(--surface);border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:25px}.modal h2{font:700 25px Georgia,serif;margin:0 0 20px}.modal-copy{color:var(--muted);line-height:1.5;margin:-8px 0 18px}.field{display:grid;gap:7px;margin-bottom:15px}.field label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:11px;background:var(--paper);padding:11px 12px}.field #soundEnabled{width:auto;margin-right:8px}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:21px;flex-wrap:wrap}.button{border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:10px 15px;font-weight:750}.button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}.button.danger{color:var(--danger)}.button:disabled{opacity:.45;cursor:not-allowed}
     .auth-shell{min-height:100dvh;display:grid;grid-template-columns:1.2fr .8fr;background:var(--paper)}.auth-art{padding:60px;display:flex;flex-direction:column;justify-content:space-between;background:var(--accent);color:#fff;overflow:hidden;position:relative}.auth-art:after{content:'“';position:absolute;right:-30px;bottom:-190px;font:600 620px Georgia,serif;color:rgba(255,255,255,.07)}.auth-logo{font:700 27px Georgia,serif}.auth-copy{position:relative;z-index:1;max-width:600px}.auth-copy h1{font:700 clamp(45px,7vw,88px)/.95 Georgia,serif;letter-spacing:-.04em;margin:0 0 28px}.auth-copy p{font-size:18px;line-height:1.6;max-width:470px;color:rgba(255,255,255,.78)}.auth-card-wrap{display:grid;place-items:center;padding:35px}.auth-card{width:min(410px,100%);background:var(--surface);padding:31px;border-radius:22px;box-shadow:var(--shadow)}.auth-card h2{font:700 27px Georgia,serif;margin:0 0 8px}.auth-card>p{color:var(--muted);line-height:1.5;margin:0 0 23px}.auth-card .button{width:100%;margin-top:6px}.auth-actions{display:grid;gap:7px}.demo-note{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.45}.auth-status{min-height:18px;margin-top:12px;color:var(--danger);font-size:12px;text-align:center;line-height:1.45}.config-badge{display:inline-block;background:var(--accent-soft);color:var(--accent-deep);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;margin-bottom:12px}
-    .toast-stack{position:fixed;right:20px;bottom:20px;z-index:50;display:grid;gap:9px}.toast{background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;animation:slideIn .2s ease}.toast.error{background:var(--danger);color:white}@keyframes slideIn{from{transform:translateY(8px);opacity:0}}
+    .toast-stack{position:fixed;right:20px;bottom:20px;z-index:50;display:grid;gap:9px}.toast{background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;animation:slideIn .2s ease}.toast.error{background:var(--danger);color:white}.update-notice{display:flex;align-items:center;gap:12px;max-width:min(360px,calc(100vw - 28px))}.update-notice button{border:0;background:var(--paper);color:var(--ink);padding:8px 10px;font-size:12px;font-weight:800;white-space:nowrap}@keyframes slideIn{from{transform:translateY(8px);opacity:0}}
     .alarm-panel{text-align:center;padding:8px}.alarm-icon{width:70px;height:70px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:white;animation:pulse 1s infinite}.alarm-panel h2{font-size:26px}.alarm-panel p{color:var(--muted);line-height:1.5}.tab-manager{display:grid;gap:8px}.tab-manager-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line)}.tab-manager-row span:nth-child(2){flex:1}.color-dot{width:12px;height:12px;border-radius:50%}.warning-box{padding:12px;border:1px solid var(--danger);color:var(--danger);font-size:13px;line-height:1.45;margin-bottom:15px}
     .mobile-top,.bottom-nav,.mobile-back{display:none}.loading{position:fixed;inset:0;background:var(--paper);z-index:100;display:grid;place-items:center}.loader{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     @media(max-width:960px){.app{grid-template-columns:210px 310px 1fr}.editor{padding-left:36px;padding-right:36px}.tool-row{left:calc(520px + (100vw - 520px)/2)}.tool-button span{display:none}}
@@ -308,7 +308,7 @@ const html = String.raw`<!doctype html>
       listening: false, voiceShouldContinue: false, voiceTarget: 'content', voiceRecentFinals: new Map(),
       voicePendingInterim:'', voiceStream:null, voiceRestartTimer:null, voiceSaveTimer:null, voiceIdleRestarts:0, voiceDirty:false,
       localMode: !cloudAvailable, mobileEditorOpen: false, syncing: false,
-      syncTimer: null, dueTimer: null, alarmInterval:null, alarmTimeout:null,
+      syncTimer: null, lastCloudRefresh:0, dueTimer: null, alarmInterval:null, alarmTimeout:null,
       settings: localRead('settings',{alarmMinutes:5,soundEnabled:true})
     };
 
@@ -474,8 +474,10 @@ const html = String.raw`<!doctype html>
 
     async function hydrateAttachmentUrls() {
       for (const item of state.attachments) {
-        const {data: signed} = await supabase.storage.from('journal-images').createSignedUrl(item.storage_path, 3600);
+        if(item.url&&item.urlExpiresAt>Date.now()+300000)continue;
+        const {data: signed} = await supabase.storage.from('journal-images').createSignedUrl(item.storage_path, 21600);
         item.url = signed?.signedUrl || '';
+        item.urlExpiresAt=Date.now()+21000000;
       }
     }
 
@@ -686,8 +688,9 @@ const html = String.raw`<!doctype html>
     function blobToDataUrl(blob){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(blob)})}
     async function deleteAttachment(id){const a=state.attachments.find(x=>x.id===id);if(!a)return;if(!confirm('Remove this photo?'))return;try{if(state.localMode){state.attachments=state.attachments.filter(x=>x.id!==id);localWrite('attachments',state.attachments)}else{const del=await supabase.storage.from('journal-images').remove([a.storage_path]);if(del.error)throw del.error;const row=await supabase.from('attachments').delete().eq('id',id);if(row.error)throw row.error;state.attachments=state.attachments.filter(x=>x.id!==id)}render()}catch(error){toast(error.message,'error')}}
 
-    async function refreshCloudData() {
-      if(state.localMode||!state.session?.user?.id||state.syncing||!navigator.onLine)return;
+    async function refreshCloudData(force=false) {
+      if(state.localMode||!state.session?.user?.id||state.syncing||!navigator.onLine||document.visibilityState!=='visible')return;
+      if(!force&&Date.now()-state.lastCloudRefresh<30000)return;
       state.syncing=true;
       try{
         const [entries,reminders,attachments,tabs,folders]=await Promise.all([
@@ -701,7 +704,8 @@ const html = String.raw`<!doctype html>
         const activeField=['entryTitle','entryContent'].includes(document.activeElement?.id),current=selectedEntry(),oldTabs=state.tabs,oldFolders=state.folders,oldReminders=state.reminders,oldAttachments=state.attachments;
         const oldIds=new Set(state.entries.map(item=>item.id));state.entries=entries.data;
         if(current&&(activeField||state.saving||localStorage.getItem('daybook-draft-'+current.id))){const index=state.entries.findIndex(item=>item.id===current.id);if(index>=0)state.entries[index]=current;else state.entries.unshift(current)}
-        state.reminders=reminders.data;state.attachments=attachments.data;state.tabs=tabs.data.length?tabs.data:state.tabs;state.folders=folders.data;if(state.folderId&&!state.folders.some(folder=>folder.id===state.folderId))state.folderId=null;if(state.tab!=='reminders'&&!state.tabs.some(tab=>tab.id===state.tab)){state.tab=state.tabs[0]?.id||'work';state.folderId=null;state.selectedId=state.entries.find(entry=>entry.space===state.tab&&!entry.archived)?.id||null}await hydrateAttachmentUrls();
+        const oldAttachmentUrls=new Map(oldAttachments.map(item=>[item.storage_path,{url:item.url,urlExpiresAt:item.urlExpiresAt}]));
+        state.reminders=reminders.data;state.attachments=attachments.data.map(item=>Object.assign(item,oldAttachmentUrls.get(item.storage_path)||{}));state.tabs=tabs.data.length?tabs.data:state.tabs;state.folders=folders.data;if(state.folderId&&!state.folders.some(folder=>folder.id===state.folderId))state.folderId=null;if(state.tab!=='reminders'&&!state.tabs.some(tab=>tab.id===state.tab)){state.tab=state.tabs[0]?.id||'work';state.folderId=null;state.selectedId=state.entries.find(entry=>entry.space===state.tab&&!entry.archived)?.id||null}await hydrateAttachmentUrls();
         const receivedNew=state.entries.some(item=>!oldIds.has(item.id));
         const signature=(items,fields)=>JSON.stringify(items.map(item=>fields.map(field=>item[field])));
         const tabsChanged=signature(oldTabs,['id','name','color','position'])!==signature(state.tabs,['id','name','color','position']);
@@ -714,11 +718,13 @@ const html = String.raw`<!doctype html>
           renderEntryListOnly();$$('[data-tab] .count').forEach(count=>{const tab=count.closest('[data-tab]');if(tab)count.textContent=tabCount(tab.dataset.tab)});$$('[data-folder] .folder-count').forEach(count=>{const folder=count.closest('[data-folder]');if(folder)count.textContent=folder.dataset.folder?folderCount(folder.dataset.folder):tabCount(state.tab)});
         }else render();
         if(receivedNew)toast('New note synced from another device');
+        state.lastCloudRefresh=Date.now();
       }catch(error){console.warn('Cloud refresh paused:',error.message)}finally{state.syncing=false}
     }
     function setupCloudRefresh(){
       clearInterval(state.syncTimer);if(state.localMode)return;
-      state.syncTimer=setInterval(refreshCloudData,12000);
+      state.lastCloudRefresh=Date.now();
+      state.syncTimer=setInterval(refreshCloudData,300000);
     }
     let alarmAudioContext;
     function playAlarmTone(){if(!state.settings.soundEnabled)return;try{alarmAudioContext=alarmAudioContext||new (window.AudioContext||window.webkitAudioContext)();if(alarmAudioContext.state==='suspended')alarmAudioContext.resume();const start=alarmAudioContext.currentTime;[0,.22,.44].forEach((offset,index)=>{const oscillator=alarmAudioContext.createOscillator(),gain=alarmAudioContext.createGain();oscillator.type='sine';oscillator.frequency.value=index===1?880:660;gain.gain.setValueAtTime(.0001,start+offset);gain.gain.exponentialRampToValueAtTime(.22,start+offset+.02);gain.gain.exponentialRampToValueAtTime(.0001,start+offset+.18);oscillator.connect(gain);gain.connect(alarmAudioContext.destination);oscillator.start(start+offset);oscillator.stop(start+offset+.2)})}catch{}}
@@ -732,15 +738,26 @@ const html = String.raw`<!doctype html>
     function checkDueReminders(){const due=state.reminders.filter(r=>!r.completed&&new Date(r.due_at)<=new Date()&&!sessionStorage.getItem('notified-'+r.id));due.forEach(triggerReminderAlarm)}
     let appStartPromise=null,startedUserId=null;
     async function signOut(){if(state.listening)stopVoice();stopAlarmSound();clearInterval(state.syncTimer);clearInterval(state.dueTimer);startedUserId=null;if(cloudAvailable)await supabase.auth.signOut();state.session=null;state.entries=[];state.tabs=[];state.folders=[];state.folderId=null;renderAuth()}
-    async function startApp(){try{$('#loading').classList.remove('hidden');await data.load();state.tab=state.tabs.some(tab=>tab.id===state.tab)?state.tab:(state.tabs[0]?.id||'work');if(state.folderId&&!state.folders.some(folder=>folder.id===state.folderId&&folder.tab_id===state.tab))state.folderId=null;const first=visibleEntries()[0];state.selectedId=first?.id||null;render();checkDueReminders();clearInterval(state.dueTimer);state.dueTimer=setInterval(checkDueReminders,15000);setupCloudRefresh();return true}catch(error){$('#loading').classList.add('hidden');toast(error.message||'Could not load your journal','error');renderAuth();return false}}
+    async function startApp(){try{$('#loading').classList.remove('hidden');await data.load();let resume=null;try{resume=JSON.parse(sessionStorage.getItem('daybook-update-reading')||'null')}catch{}sessionStorage.removeItem('daybook-update-reading');if(resume&&state.tabs.some(tab=>tab.id===resume.tab)){state.tab=resume.tab;state.folderId=resume.folderId||null}state.tab=state.tabs.some(tab=>tab.id===state.tab)?state.tab:(state.tabs[0]?.id||'work');if(state.folderId&&!state.folders.some(folder=>folder.id===state.folderId&&folder.tab_id===state.tab))state.folderId=null;const first=visibleEntries()[0],savedEntry=resume&&state.entries.find(entry=>entry.id===resume.id&&entry.space===state.tab&&!entry.archived);state.selectedId=savedEntry?.id||first?.id||null;if(savedEntry)state.mobileEditorOpen=Boolean(resume.mobileOpen);render();if(savedEntry){const pane=$('#editorPane'),content=$('#entryContent'),restore=()=>{if(pane&&content&&$('#editorPane')===pane){content.scrollTop=resume.content||0;pane.scrollTop=resume.pane||0}};restore();requestAnimationFrame(restore);setTimeout(restore,100)}checkDueReminders();clearInterval(state.dueTimer);state.dueTimer=setInterval(checkDueReminders,15000);setupCloudRefresh();return true}catch(error){$('#loading').classList.add('hidden');toast(error.message||'Could not load your journal','error');renderAuth();return false}}
     async function ensureAppStarted(session){const userId=session?.user?.id;if(!userId){renderAuth();return false}state.session=session;if(startedUserId===userId&&!$('#appRoot').classList.contains('hidden'))return true;if(appStartPromise)return appStartPromise;appStartPromise=(async()=>{const started=await startApp();if(started)startedUserId=userId;return started})().finally(()=>{appStartPromise=null});return appStartPromise}
 
     document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#searchInput')?.focus()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='n'){e.preventDefault();createEntry(state.tab==='reminders'?(state.tabs[0]?.id||'work'):state.tab)}if(e.key==='Escape'&&$('#modalRoot').innerHTML){stopAlarmSound();closeModal()}});
     document.addEventListener('paste',handleClipboardPaste);
     document.addEventListener('pointerdown',()=>{if(!state.settings.soundEnabled||alarmAudioContext)return;try{alarmAudioContext=new (window.AudioContext||window.webkitAudioContext)();alarmAudioContext.resume()}catch{}},{once:true});
-    window.addEventListener('online',()=>{toast('Back online');refreshCloudData()});window.addEventListener('offline',()=>toast('Offline — drafts stay on this device'));
+    window.addEventListener('online',()=>{toast('Back online');refreshCloudData(true)});window.addEventListener('offline',()=>toast('Offline — drafts stay on this device'));
     window.addEventListener('focus',refreshCloudData);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshCloudData();else if(state.listening){if(state.voicePendingInterim)commitSpeechChunk(state.voicePendingInterim,state.recognition);flushVoiceSave()}});window.addEventListener('pagehide',()=>{if(state.voicePendingInterim)commitSpeechChunk(state.voicePendingInterim,state.recognition);flushVoiceSave()});
-    if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    if('serviceWorker' in navigator){
+      let updateNoticeShown=false;const hadController=Boolean(navigator.serviceWorker.controller);
+      const showUpdateNotice=()=>{if(updateNoticeShown)return;updateNoticeShown=true;const notice=document.createElement('div');notice.className='toast update-notice';notice.innerHTML='<span>A new Daybook version is ready.</span><button type="button">Update now</button>';notice.querySelector('button').onclick=()=>{const pane=$('#editorPane'),content=$('#entryContent'),entry=selectedEntry();if(pane&&content&&entry)sessionStorage.setItem('daybook-update-reading',JSON.stringify({id:entry.id,tab:state.tab,folderId:state.folderId,mobileOpen:state.mobileEditorOpen,pane:pane.scrollTop,content:content.scrollTop}));location.reload()};$('#toastRoot').append(notice)};
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadController)showUpdateNotice()});
+      navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(registration=>{
+        const watch=worker=>worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&hadController)showUpdateNotice()});
+        if(registration.waiting&&hadController)showUpdateNotice();watch(registration.installing);
+        registration.addEventListener('updatefound',()=>watch(registration.installing));
+        const checkUpdate=()=>{if(navigator.onLine)registration.update().catch(()=>{})};
+        checkUpdate();window.addEventListener('focus',checkUpdate);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate()});
+      }).catch(()=>{});
+    }
 
     if(cloudAvailable){const {data:{session},error}=await supabase.auth.getSession();state.session=session;supabase.auth.onAuthStateChange((event,next)=>{state.session=next;if(event==='SIGNED_OUT'){startedUserId=null;renderAuth();return}if(next&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='USER_UPDATED'))setTimeout(()=>ensureAppStarted(next),0)});if(error){startupWarning=error.message||'Your saved session could not be restored.';renderAuth()}else if(session)await ensureAppStarted(session);else renderAuth()}else renderAuth();
   </script>
@@ -757,7 +774,32 @@ const manifest = JSON.stringify({
 }, null, 2);
 
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="72" fill="#0c0e0f"/><rect x="52" y="52" width="408" height="408" rx="28" fill="none" stroke="#34383c" stroke-width="16"/><path d="M142 132h94c91 0 148 45 148 124s-57 124-148 124h-94V132Zm92 193c52 0 82-24 82-69s-30-69-82-69h-25v138h25Z" fill="#ff5a00"/></svg>`;
-const serviceWorker = `const CACHE='daybook-v5';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/journal-icon.png'])))});self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&new URL(e.request.url).origin===self.location.origin)e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))))});self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if('focus' in client){client.navigate('/');return client.focus()}}return clients.openWindow('/')}))});`;
+const serviceWorker = `const CACHE='daybook-v6';
+self.addEventListener('install',event=>{
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(['/','/manifest.webmanifest','/journal-icon.png'])));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil(Promise.all([
+    caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),
+    self.clients.claim()
+  ]));
+});
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET'||new URL(event.request.url).origin!==self.location.origin)return;
+  event.respondWith(fetch(event.request,{cache:event.request.mode==='navigate'?'no-store':'default'}).then(response=>{
+    const copy=response.clone();
+    event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));
+    return response;
+  }).catch(()=>caches.match(event.request).then(cached=>cached||caches.match('/'))));
+});
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
+    for(const client of list){if('focus' in client){client.navigate('/');return client.focus()}}
+    return clients.openWindow('/');
+  }));
+});`;
 
 function build() {
   if (!fs.existsSync(APP_ICON)) throw new Error('Missing required app icon: MyJournal_icon.png');
